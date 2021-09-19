@@ -1,0 +1,9 @@
+﻿/.idea
+/.vs
+/bin
+/Resourses
+/bin
+/obj
+
+*.csproj
+*.sln
