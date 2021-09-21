@@ -83,7 +83,7 @@ namespace BikeShop.Controllers
             BikeRepository.Delete(id);
 
 
-            return NoContent();
+            return Ok();
         }
     }
 }
