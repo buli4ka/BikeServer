@@ -21,6 +21,7 @@ namespace BikeShop
     public class Startup
     {
         readonly string MyAllowSpecificOrigins = "_myAllowSpecificOrigins";
+
         public Startup(IConfiguration configuration)
         {
             Configuration = configuration;
@@ -33,29 +34,28 @@ namespace BikeShop
         {
             Directory.CreateDirectory(Path.Combine(Directory.GetCurrentDirectory(), Configuration["ImageFolder"]));
             services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
-                   .AddJwtBearer(options =>
-                   {
-                       options.RequireHttpsMetadata = false;
-                       options.TokenValidationParameters = new TokenValidationParameters
-                       {
-                           ValidateIssuer = true,
-                           ValidIssuer = BikeShop.TokenConfig.TokenConfig.ISSUER,
-                           ValidateAudience = true,
-                           ValidAudience = BikeShop.TokenConfig.TokenConfig.AUDIENCE,
-                           ValidateLifetime = true,
-                           IssuerSigningKey = BikeShop.TokenConfig.TokenConfig.GetSymmetricSecurityKey(),
-                           ValidateIssuerSigningKey = true,
-                       };
-                   });
+                .AddJwtBearer(options =>
+                {
+                    options.RequireHttpsMetadata = false;
+                    options.TokenValidationParameters = new TokenValidationParameters
+                    {
+                        ValidateIssuer = true,
+                        ValidIssuer = BikeShop.TokenConfig.TokenConfig.ISSUER,
+                        ValidateAudience = true,
+                        ValidAudience = BikeShop.TokenConfig.TokenConfig.AUDIENCE,
+                        ValidateLifetime = true,
+                        IssuerSigningKey = BikeShop.TokenConfig.TokenConfig.GetSymmetricSecurityKey(),
+                        ValidateIssuerSigningKey = true,
+                    };
+                });
             services.AddControllers();
-            services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo { Title = "BikeShop", Version = "v1" }); });
-            services.AddDbContext<ShopContext>(options => options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddSwaggerGen(c => { c.SwaggerDoc("v1", new OpenApiInfo {Title = "BikeShop", Version = "v1"}); });
+            services.AddDbContext<ShopContext>(options =>
+                options.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
             services.AddCors(options =>
             {
-                options.AddPolicy(name: MyAllowSpecificOrigins, builder =>
-                                  {
-                                      builder.WithOrigins("http://localhost:3000").AllowAnyHeader().AllowAnyMethod();
-                                  });
+                options.AddPolicy(name: MyAllowSpecificOrigins,
+                    builder => { builder.WithOrigins("http://localhost:3000").AllowAnyHeader().AllowAnyMethod(); });
             });
             services.Configure<FormOptions>(o =>
             {
@@ -65,6 +65,7 @@ namespace BikeShop
             });
             services.AddTransient<IBaseRepository<Order>, BaseRepository<Order>>();
             services.AddTransient<IBaseRepository<Bike>, BaseRepository<Bike>>();
+            services.AddTransient<IBaseRepository<Cart>, BaseRepository<Cart>>();
 
             services.AddTransient<IBaseRepository<User>, BaseRepository<User>>();
             services.AddTransient<IBaseRepository<Image>, BaseRepository<Image>>();
@@ -79,13 +80,16 @@ namespace BikeShop
             {
                 app.UseDeveloperExceptionPage();
                 app.UseSwagger();
-                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json","BikeShop v1"));
+                app.UseSwaggerUI(c => c.SwaggerEndpoint("/swagger/v1/swagger.json", "BikeShop v1"));
             }
+
             app.UseStaticFiles();
             app.UseStaticFiles(new StaticFileOptions()
             {
-                FileProvider = new PhysicalFileProvider(Path.Combine(Directory.GetCurrentDirectory(), Configuration["ImageFolder"])),
-                RequestPath = new PathString("/"+ Configuration["ImageFolder"])
+                FileProvider =
+                    new PhysicalFileProvider(
+                        Path.Combine(Directory.GetCurrentDirectory(), Configuration["ImageFolder"])),
+                RequestPath = new PathString("/" + Configuration["ImageFolder"])
             });
             app.UseCors(MyAllowSpecificOrigins);
             app.UseRouting();
@@ -93,10 +97,7 @@ namespace BikeShop
             app.UseAuthorization();
 
             app
-                .UseEndpoints(endpoints =>
-                {
-                    endpoints.MapControllers();
-                });
+                .UseEndpoints(endpoints => { endpoints.MapControllers(); });
         }
     }
 }

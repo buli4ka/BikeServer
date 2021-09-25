@@ -18,7 +18,6 @@ namespace BikeShop.Controllers
         private IBaseRepository<Bike> BikeRepository { get; set; }
 
         private IBaseRepository<Manufacturer> ManufacturerRepository { get; set; }
-        
 
         public BikeController(IBaseRepository<Bike> bikes
             , IBaseRepository<Manufacturer> manufacturer)
@@ -30,9 +29,23 @@ namespace BikeShop.Controllers
         [HttpGet("getBikes")]
         public ActionResult<List<Bike>> GetAll()
         {
-            
             return BikeRepository.GetAll();
         }
+        
+        // [HttpPost("getBikesByIds")]
+        // public ActionResult<List<Bike>> GetAllByIds(List<Guid> ids)
+        // {
+        //     List<Bike> bikes = new List<Bike>();
+        //     BikeRepository.GetAll().ForEach(i =>
+        //     {
+        //         if (ids.Contains(i.Id))
+        //         {
+        //             bikes.Add(i);
+        //         }
+        //     });
+        //     return bikes ;
+        // }
+        
 
         [HttpGet("getBikeById/{id}")]
         public ActionResult<Bike> GetById(Guid id)
@@ -42,7 +55,6 @@ namespace BikeShop.Controllers
                 return NotFound();
 
             return bike;
-
         }
         [HttpPost("addBike")]
         public IActionResult Create(Bike bike)
