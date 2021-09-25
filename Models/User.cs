@@ -15,7 +15,9 @@ namespace BikeShop.Models
         public string Role { get; set; }
         public string Password { get; set; }
         
-        pub
+        public ICollection<Cart> Carts { get; set; }
+        
+        public Guid CartId { get; set; }
 
         public override string ToString()
         {
