@@ -3,7 +3,9 @@ using System.Collections.Generic;
 using System.Linq;
 using CarShop.Database;
 using CarShop.Models.Base;
+using CarShop.Models.CarAttributes;
 using CarShop.Repositories.Interfaces;
+using Microsoft.EntityFrameworkCore;
 
 namespace CarShop.Repositories.Implementation
 {
@@ -42,6 +44,7 @@ namespace CarShop.Repositories.Implementation
             {
                 toUpdate = model;
             }
+
             Context.Update(toUpdate);
             Context.SaveChanges();
             return toUpdate;
@@ -51,6 +54,8 @@ namespace CarShop.Repositories.Implementation
         {
             return Context.Set<TDbModel>().FirstOrDefault(m => m.Id == id);
         }
+
+    
        
     }
 }

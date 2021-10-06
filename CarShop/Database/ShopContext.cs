@@ -1,6 +1,7 @@
 ﻿using Microsoft.EntityFrameworkCore;
 using CarShop.Models;
 using CarShop.Models.CarAttributes;
+// using CarShop.Models.CarAttributes.ManyToManyModels;
 
 
 namespace CarShop.Database
@@ -21,11 +22,10 @@ namespace CarShop.Database
         public DbSet<WheelDrive> WheelDrives { get; set; }
         public DbSet<Engine> Engines { get; set; }
         public DbSet<Transmission> Transmissions { get; set; }
-
-
-
-
         
+
+
+
         public ShopContext(DbContextOptions<ShopContext> options)
             : base(options)
         {

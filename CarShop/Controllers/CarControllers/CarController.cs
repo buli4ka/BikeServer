@@ -1,65 +1,91 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
 using CarShop.Controllers.BaseController;
 using CarShop.Models;
 using CarShop.Models.CarAttributes;
+using CarShop.Repositories.Implementation;
 using CarShop.Repositories.Interfaces;
 using Microsoft.AspNetCore.Mvc;
 
 namespace CarShop.Controllers.CarControllers
 {
-    public class CarController : BaseController<Car>
+    [ApiController]
+    [Route("api/[controller]")]
+    public class CarController : ControllerBase
     {
-        private readonly IBaseRepository<Manufacturer> _manufacturerRepository ;
-        private readonly IBaseRepository<Engine> _engineRepository ;
-        private readonly IBaseRepository<WheelDrive> _wheelDriveRepository;
-        private readonly IBaseRepository<Transmission> _transmissionRepository ;
-        private readonly IBaseRepository<Comfort> _comfortRepository ;
-        private readonly IBaseRepository<Security> _securityRepository ;
+        private readonly ICarRepository _carRepository;
 
-
-        public CarController(IBaseRepository<Car> repository
-            , IBaseRepository<Manufacturer> manufacturerRepository
-            , IBaseRepository<Engine> engineRepository
-            , IBaseRepository<WheelDrive> wheelDriveRepository
-            , IBaseRepository<Transmission> transmissionRepository
-            , IBaseRepository<Comfort> comfortRepository
-            , IBaseRepository<Security> securityRepository
-        ) :
-            base(repository)
+        public CarController(ICarRepository carRepository)
         {
-            _manufacturerRepository = manufacturerRepository;
-            _engineRepository = engineRepository;
-            _wheelDriveRepository = wheelDriveRepository;
-            _transmissionRepository = transmissionRepository;
-            _comfortRepository = comfortRepository;
-            _securityRepository = securityRepository;
+            _carRepository = carRepository;
+        }
+
+        [HttpGet("getAll")]
+        public virtual ActionResult<List<Car>> GetAll()
+        {
+            return _carRepository.GetAll();
+        }
+
+        [HttpGet("getById/{id:guid}")]
+        public async Task<IActionResult> Get(Guid id)
+        {
+            var requestCar = await _carRepository.GetById(id);
+            if (requestCar is null)
+                return NotFound();
+
+            return Ok(new
+            {
+                requestCar.Id,
+                requestCar.Name,
+                requestCar.Price,
+                requestCar.Description,
+                Manufacturer = requestCar.Manufacturer.Name,
+                Engine = requestCar.Engine.Name,
+                Transmission = requestCar.Transmission.Name,
+                WheelDrive = requestCar.WheelDrive.Name,
+                Comforts = requestCar.Comfort.Select(c => c.Name),
+                Securities = requestCar.Securities.Select(c => c.Name),
+                Images = requestCar.Images.Select(image => image.Id),
+            });
         }
 
         [HttpPost("add")]
-        public override IActionResult Create(Car requestCar)
+        public IActionResult Create(Car requestCar)
         {
-            
-            var car = new Car
-            {
-                Name = requestCar.Name,
-                Description = requestCar.Description,
-                Manufacturer = _manufacturerRepository.GetById(requestCar.Manufacturer.Id),
-                Engine = _engineRepository.GetById(requestCar.Engine.Id),
-                WheelDrive = _wheelDriveRepository.GetById(requestCar.WheelDrive.Id),
-                Transmission = _transmissionRepository.GetById(requestCar.Transmission.Id),
-              
-                // Engine = {Id = requestCar.Engine.Id},
-                // WheelDrive = {Id = requestCar.WheelDrive.Id},
-                // Transmission = {Id = requestCar.Transmission.Id},
-                // Manufacturer = {Id = requestCar.Manufacturer.Id},
-                Comfort = requestCar.Comfort.Select(i => _comfortRepository.GetById(i.Id)).ToList(),
-                Securities = requestCar.Securities.Select(i => _securityRepository.GetById(i.Id)).ToList(),
-            };
-
-            Repository.Create(car);
+            var car = _carRepository.Create(requestCar);
             return CreatedAtAction(nameof(Create), new {id = car.Id}, car);
+        }
+
+        [HttpPut("update/{id:guid}")]
+        public async Task<IActionResult> Update(Guid id, Car tModel)
+        {
+            if (id != tModel.Id)
+                return BadRequest();
+
+            var existing = await _carRepository.GetById(id);
+            if (existing is null)
+                return NotFound();
+
+            _carRepository.Update(tModel);
+
+            return NoContent();
+        }
+
+        [HttpDelete("delete/{id:guid}")]
+        public async Task<IActionResult> Delete(Guid id)
+        {
+            var tModel = await _carRepository.GetById(id);
+
+            if (tModel is null)
+            {
+                return NotFound();
+            }
+
+            _carRepository.Delete(id);
+
+            return NoContent();
         }
     }
 }

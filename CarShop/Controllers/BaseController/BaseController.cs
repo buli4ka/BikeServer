@@ -25,13 +25,13 @@ namespace CarShop.Controllers.BaseController
 
 
         [HttpGet("getById/{id:guid}")]
-        public virtual ActionResult<TModel> Get(Guid id)
+        public virtual IActionResult Get(Guid id)
         {
             var tModel = Repository.GetById(id);
             if (tModel is null)
                 return NotFound();
 
-            return tModel;
+            return Ok(tModel);
         }
         
         [HttpPost("add")]

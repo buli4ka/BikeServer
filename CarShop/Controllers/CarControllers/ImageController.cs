@@ -27,7 +27,7 @@ namespace CarShop.Controllers.CarControllers
 
 
         [HttpGet("getPreview/{carId:guid}")]
-        public ActionResult GetFirst(Guid carId)
+        public IActionResult GetFirst(Guid carId)
         {
             var image = Repository.GetAll().FirstOrDefault(i => i.CarId == carId);
             if (image is null)
@@ -37,7 +37,7 @@ namespace CarShop.Controllers.CarControllers
         }
 
         [HttpGet("getById/{imageId:guid}")]
-        public override ActionResult<Image> Get(Guid imageId)
+        public override IActionResult Get(Guid imageId)
         {
             var image = Repository.GetById(imageId);
             if (image is null)
